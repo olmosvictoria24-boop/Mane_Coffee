@@ -4,92 +4,372 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de pedidos - DeskFox</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #fdf7f0; font-family: "Poppins","Segoe UI",sans-serif; color: #3d2817; margin: 0; }
+        :root {
+            --naranja: #ff8c42;
+            --naranja-brillante: #ff9f60;
+            --naranja-oscuro: #e67e22;
+            --negro: #0a0a0a;
+            --negro-claro: #1a1a1a;
+            --cafe: #3d2817;
+            --cafe-claro: #5d4037;
+            --blanco: #ffffff;
+            --blanco-humo: #f5f5f5;
+            --gris: #2a2a2a;
+            --sombra-fuerte: 0 10px 40px rgba(0, 0, 0, 0.6);
+            --sombra-naranja: 0 8px 30px rgba(255, 140, 66, 0.4);
+            --gradiente-oscuro: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+            --gradiente-naranja: linear-gradient(135deg, #ff8c42 0%, #ff9f60 100%);
 
-        #dx-login { max-width: 340px; margin: 90px auto; background: #fff; border: 2px solid #ff8c42;
-            border-radius: 16px; padding: 28px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
-        #dx-login h1 { font-size: 20px; color: #e67e22; margin: 0 0 16px; }
-        #dx-login input { width: 100%; box-sizing: border-box; padding: 11px; margin: 6px 0;
-            border: 1px solid #eadfce; border-radius: 9px; font: 14px "Poppins","Segoe UI",sans-serif; }
-        #dx-login button { width: 100%; margin-top: 8px; padding: 11px; border: none; border-radius: 10px;
-            background: #ff8c42; color: #fff; font-weight: 700; cursor: pointer; }
-        #dx-login-msg { color: #c0392b; font-size: 13px; min-height: 18px; }
+            /* colores de estado (ajustados para fondo oscuro) */
+            --st-pendiente: #ff5c4d;
+            --st-preparando: #ff8c42;
+            --st-listo: #4cd08a;
+            --st-entregado: #8a8a8a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: var(--negro);
+            color: var(--blanco);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 15% 85%, rgba(255, 140, 66, 0.10) 0%, transparent 45%),
+                radial-gradient(circle at 85% 10%, rgba(255, 140, 66, 0.07) 0%, transparent 45%);
+            background-attachment: fixed;
+        }
+
+        /* ---------- LOGIN ---------- */
+        #dx-login {
+            max-width: 380px;
+            margin: 110px auto;
+            background: var(--gris);
+            border: 2px solid var(--naranja);
+            border-radius: 25px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: var(--sombra-fuerte), 0 0 60px rgba(255, 140, 66, 0.15);
+        }
+
+        .dx-brand {
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            white-space: nowrap;
+        }
+        .dx-brand .desk { color: var(--naranja); text-shadow: 0 0 18px rgba(255, 140, 66, 0.55); }
+        .dx-brand .fox  { color: var(--blanco); margin-left: 2px; }
+
+        #dx-login .dx-brand { font-size: 2rem; margin-bottom: 0.3rem; }
+        #dx-login h1 {
+            font-size: 0.85rem;
+            color: var(--blanco-humo);
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1.6rem;
+            opacity: 0.8;
+        }
+
+        #dx-login input {
+            width: 100%;
+            padding: 1rem 1.1rem;
+            margin: 6px 0;
+            border: 2px solid var(--negro-claro);
+            border-radius: 15px;
+            font: 0.95rem 'Poppins', 'Segoe UI', sans-serif;
+            background: var(--negro-claro);
+            color: var(--blanco);
+            transition: all 0.3s ease;
+        }
+        #dx-login input::placeholder { color: rgba(245, 245, 245, 0.45); }
+        #dx-login input:focus {
+            outline: none;
+            border-color: var(--naranja);
+            box-shadow: 0 0 20px rgba(255, 140, 66, 0.3);
+        }
+
+        #dx-login button {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 1rem;
+            border: none;
+            border-radius: 50px;
+            background: var(--gradiente-naranja);
+            color: var(--negro);
+            font: 800 1rem 'Poppins', 'Segoe UI', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow: 0 5px 25px rgba(255, 140, 66, 0.4);
+            transition: all 0.3s ease;
+        }
+        #dx-login button:hover { transform: translateY(-3px); box-shadow: 0 10px 35px rgba(255, 140, 66, 0.6); }
+
+        #dx-login-msg { color: var(--st-pendiente); font-size: 0.85rem; min-height: 22px; margin-top: 6px; }
 
         #dx-app { display: none; }
 
-        .dx-topbar { position: sticky; top: 0; z-index: 5; background: #fdf7f0; border-bottom: 1px solid #f0dfc9;
-            padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; }
-        .dx-topbar h1 { font-size: 22px; margin: 0; color: #e67e22; display: flex; align-items: center; gap: 8px; }
-        .dx-live { width: 9px; height: 9px; border-radius: 50%; background: #2e7d32;
-            box-shadow: 0 0 0 rgba(46,125,50,.5); animation: dx-pulse 1.8s infinite; }
-        @keyframes dx-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(46,125,50,.5); }
-            70% { box-shadow: 0 0 0 7px rgba(46,125,50,0); }
-            100% { box-shadow: 0 0 0 0 rgba(46,125,50,0); }
+        /* ---------- TOPBAR ---------- */
+        .dx-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--naranja);
+            box-shadow: 0 5px 30px rgba(255, 140, 66, 0.2);
+            padding: 0.9rem 2rem;
         }
-        .dx-logout { padding: 9px 16px; border: 1px solid #e0c9a6; border-radius: 9px; background: #fff;
-            color: #7a5a35; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .dx-topbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .dx-title { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; }
+        .dx-title .dx-brand { font-size: 1.6rem; }
+        .dx-title small {
+            font-size: 0.8rem;
+            color: var(--naranja);
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding-left: 0.9rem;
+            border-left: 2px solid var(--cafe-claro);
+        }
 
-        .dx-wrap { max-width: 980px; margin: 0 auto; padding: 20px 24px 60px; }
+        .dx-live {
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--st-listo);
+            animation: dx-pulse 1.8s infinite;
+            margin-right: 6px;
+        }
+        @keyframes dx-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(76, 208, 138, 0.6); }
+            70%  { box-shadow: 0 0 0 9px rgba(76, 208, 138, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 208, 138, 0); }
+        }
 
-        .dx-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-        .dx-filter { padding: 8px 14px; border-radius: 20px; border: 1px solid #eadfce; background: #fff;
-            color: #7a5a35; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .dx-filter .dx-count { background: #f0e4d4; color: #7a5a35; border-radius: 10px; padding: 1px 7px; font-size: 12px; }
-        .dx-filter.active { background: #ff8c42; border-color: #ff8c42; color: #fff; }
-        .dx-filter.active .dx-count { background: rgba(255,255,255,.3); color: #fff; }
+        .dx-logout {
+            padding: 0.6rem 1.4rem;
+            border: 2px solid var(--naranja);
+            border-radius: 30px;
+            background: transparent;
+            color: var(--naranja);
+            font: 700 0.85rem 'Poppins', 'Segoe UI', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .dx-logout:hover {
+            background: var(--naranja);
+            color: var(--negro);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 140, 66, 0.4);
+        }
 
-        .dx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+        .dx-wrap { max-width: 1200px; margin: 0 auto; padding: 2rem 2rem 4rem; }
 
-        .dx-order { background: #fff; border-radius: 14px; padding: 16px 18px; box-shadow: 0 2px 10px rgba(61,40,23,.06);
-            border-left: 5px solid #ccc; display: flex; flex-direction: column; gap: 10px; }
-        .dx-order.pendiente { border-left-color: #c0392b; }
-        .dx-order.preparando { border-left-color: #e67e22; }
-        .dx-order.listo { border-left-color: #2e7d32; }
-        .dx-order.entregado { border-left-color: #9a9a9a; }
+        /* ---------- FILTROS ---------- */
+        .dx-filters { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 2rem; }
 
-        .dx-order-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-        .dx-order-who { font-weight: 700; font-size: 16px; }
-        .dx-order-time { font-size: 12px; color: #a08b6f; margin-top: 2px; }
+        .dx-filter {
+            padding: 0.65rem 1.2rem;
+            border-radius: 30px;
+            border: 2px solid var(--gris);
+            background: var(--negro-claro);
+            color: var(--blanco-humo);
+            font: 600 0.85rem 'Poppins', 'Segoe UI', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.3s ease;
+        }
+        .dx-filter:hover {
+            border-color: var(--naranja);
+            color: var(--naranja-brillante);
+            transform: translateY(-2px);
+        }
+        .dx-filter .dx-count {
+            background: var(--gris);
+            color: var(--blanco-humo);
+            border-radius: 12px;
+            padding: 1px 9px;
+            font-size: 0.75rem;
+            min-width: 24px;
+            text-align: center;
+        }
+        .dx-filter.active {
+            background: var(--gradiente-naranja);
+            border-color: transparent;
+            color: var(--negro);
+            box-shadow: 0 5px 20px rgba(255, 140, 66, 0.4);
+        }
+        .dx-filter.active .dx-count { background: rgba(10, 10, 10, 0.25); color: var(--negro); }
 
-        .dx-badge { font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: 700;
-            white-space: nowrap; text-transform: uppercase; letter-spacing: .3px; }
-        .dx-badge.pendiente { background: #fdecea; color: #c0392b; }
-        .dx-badge.preparando { background: #fff4e0; color: #e67e22; }
-        .dx-badge.listo { background: #e8f6ea; color: #2e7d32; }
-        .dx-badge.entregado { background: #eee; color: #777; }
+        /* ---------- TARJETAS ---------- */
+        .dx-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 1.4rem;
+        }
 
-        .dx-order ul { margin: 0; padding-left: 18px; font-size: 14px; color: #4a3826; }
-        .dx-order ul li { margin-bottom: 2px; }
+        .dx-order {
+            --st: var(--st-entregado);
+            background: var(--gris);
+            border-radius: 20px;
+            padding: 1.3rem 1.4rem 1.3rem 1.6rem;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        /* franja de color del estado */
+        .dx-order::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 6px;
+            background: var(--st);
+            box-shadow: 0 0 18px var(--st);
+        }
+        .dx-order:hover {
+            border-color: var(--naranja);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 140, 66, 0.25);
+        }
+        .dx-order.pendiente  { --st: var(--st-pendiente); }
+        .dx-order.preparando { --st: var(--st-preparando); }
+        .dx-order.listo      { --st: var(--st-listo); }
+        .dx-order.entregado  { --st: var(--st-entregado); opacity: 0.75; }
 
-        .dx-order-total { display: flex; justify-content: space-between; align-items: center;
-            border-top: 1px dashed #eee0cc; padding-top: 10px; font-weight: 700; font-size: 15px; }
+        .dx-order-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.6rem; }
+        .dx-order-who { font-weight: 800; font-size: 1.15rem; color: var(--blanco); word-break: break-word; }
+        .dx-order-time { font-size: 0.78rem; color: var(--naranja); margin-top: 2px; letter-spacing: 0.5px; }
 
-        .dx-order-actions { display: flex; gap: 8px; }
-        .dx-order-actions select { flex: 1; padding: 7px 8px; border-radius: 8px; border: 1px solid #eadfce;
-            font: 13px "Poppins","Segoe UI",sans-serif; background: #fff; color: #3d2817; }
-        .dx-del-btn { padding: 7px 12px; border-radius: 8px; border: 1px solid #f3c8c2; background: #fdecea;
-            color: #c0392b; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-        .dx-del-btn:hover { background: #c0392b; color: #fff; }
+        .dx-badge {
+            font-size: 0.68rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-weight: 800;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--st);
+            border: 2px solid var(--st);
+            background: rgba(0, 0, 0, 0.25);
+        }
 
-        .dx-empty { text-align: center; color: #a08b6f; padding: 60px 0; font-size: 15px; grid-column: 1 / -1; }
+        .dx-order ul { list-style: none; font-size: 0.95rem; color: var(--blanco-humo); }
+        .dx-order ul li {
+            padding: 0.4rem 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+            display: flex;
+            gap: 0.6rem;
+        }
+        .dx-order ul li:last-child { border-bottom: none; }
+        .dx-order ul li b { color: var(--naranja); font-weight: 800; min-width: 28px; }
+
+        .dx-order-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid rgba(255, 140, 66, 0.25);
+            padding-top: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+        }
+        .dx-order-total span:last-child { color: var(--naranja); font-size: 1.4rem; font-weight: 900; letter-spacing: 0; }
+
+        .dx-order-actions { display: flex; gap: 0.6rem; }
+        .dx-order-actions select {
+            flex: 1;
+            padding: 0.6rem 0.8rem;
+            border-radius: 12px;
+            border: 2px solid var(--negro-claro);
+            background: var(--negro-claro);
+            color: var(--blanco);
+            font: 600 0.85rem 'Poppins', 'Segoe UI', sans-serif;
+            text-transform: capitalize;
+            cursor: pointer;
+            color-scheme: dark;
+            transition: all 0.3s ease;
+        }
+        .dx-order-actions select:hover,
+        .dx-order-actions select:focus { outline: none; border-color: var(--naranja); }
+
+        .dx-del-btn {
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 92, 77, 0.5);
+            background: transparent;
+            color: var(--st-pendiente);
+            font: 700 0.8rem 'Poppins', 'Segoe UI', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+        .dx-del-btn:hover { background: var(--st-pendiente); border-color: var(--st-pendiente); color: var(--negro); }
+
+        .dx-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--blanco-humo);
+            opacity: 0.6;
+            padding: 5rem 1rem;
+            font-size: 1rem;
+            border: 3px dashed var(--cafe-claro);
+            border-radius: 25px;
+        }
+
+        @media (max-width: 576px) {
+            .dx-topbar { padding: 0.8rem 1rem; }
+            .dx-title small { display: none; }
+            .dx-wrap { padding: 1.4rem 1rem 3rem; }
+            .dx-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div id="dx-login">
+        <div class="dx-brand"><span class="desk">Desk</span><span class="fox">Fox</span></div>
         <h1>Acceso del personal</h1>
-        <input id="dx-email" type="email" placeholder="Correo">
-        <input id="dx-pass" type="password" placeholder="Contraseña">
+        <input id="dx-email" type="email" placeholder="Correo" autocomplete="username">
+        <input id="dx-pass" type="password" placeholder="Contraseña" autocomplete="current-password">
         <div id="dx-login-msg"></div>
         <button id="dx-login-btn">Entrar</button>
     </div>
 
     <div id="dx-app">
         <div class="dx-topbar">
-            <h1><span class="dx-live"></span> Pedidos DeskFox</h1>
-            <button class="dx-logout" id="dx-logout-btn">Salir</button>
+            <div class="dx-topbar-inner">
+                <div class="dx-title">
+                    <div class="dx-brand"><span class="desk">Desk</span><span class="fox">Fox</span></div>
+                    <small><span class="dx-live"></span>Pedidos en vivo</small>
+                </div>
+                <button class="dx-logout" id="dx-logout-btn">Salir</button>
+            </div>
         </div>
         <div class="dx-wrap">
             <div class="dx-filters" id="dx-filters"></div>
@@ -105,6 +385,7 @@
         var ESTADOS = ['pendiente', 'preparando', 'listo', 'entregado'];
         var filtro = 'todos';
         var pedidosCache = [];
+        var subscribed = false;
 
         var loginBox = document.getElementById('dx-login');
         var app = document.getElementById('dx-app');
@@ -112,7 +393,14 @@
         var filtersEl = document.getElementById('dx-filters');
         var loginMsg = document.getElementById('dx-login-msg');
 
-        document.getElementById('dx-login-btn').addEventListener('click', function () {
+        /* Escapa texto para que nadie inyecte HTML desde un pedido */
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
+        function login() {
             var email = document.getElementById('dx-email').value.trim();
             var pass = document.getElementById('dx-pass').value;
             loginMsg.textContent = '';
@@ -120,6 +408,11 @@
                 if (res.error) { loginMsg.textContent = 'Correo o contraseña incorrectos'; return; }
                 showApp();
             });
+        }
+
+        document.getElementById('dx-login-btn').addEventListener('click', login);
+        document.getElementById('dx-pass').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') login();
         });
 
         document.getElementById('dx-logout-btn').addEventListener('click', function () {
@@ -130,14 +423,22 @@
             loginBox.style.display = 'none';
             app.style.display = 'block';
             loadOrders();
-            sb.channel('pedidos-realtime')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, loadOrders)
-                .subscribe();
+            if (!subscribed) {
+                subscribed = true;
+                sb.channel('pedidos-realtime')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, loadOrders)
+                    .subscribe();
+                // refresca "hace X min" cada minuto
+                setInterval(renderOrders, 60000);
+            }
         }
 
         function loadOrders() {
             sb.from('pedidos').select('*').order('creado_en', { ascending: false }).then(function (res) {
-                if (res.error) { ordersEl.innerHTML = '<div class="dx-empty">Error cargando pedidos: ' + res.error.message + '</div>'; return; }
+                if (res.error) {
+                    ordersEl.innerHTML = '<div class="dx-empty">Error cargando pedidos: ' + esc(res.error.message) + '</div>';
+                    return;
+                }
                 pedidosCache = res.data || [];
                 renderFilters();
                 renderOrders();
@@ -146,10 +447,12 @@
 
         function renderFilters() {
             var counts = { todos: pedidosCache.length };
-            ESTADOS.forEach(function (e) { counts[e] = pedidosCache.filter(function (p) { return p.estado === e; }).length; });
+            ESTADOS.forEach(function (e) {
+                counts[e] = pedidosCache.filter(function (p) { return p.estado === e; }).length;
+            });
 
             var tabs = [{ id: 'todos', label: 'Todos' }].concat(
-                ESTADOS.map(function (e) { return { id: e, label: e.charAt(0).toUpperCase() + e.slice(1) }; })
+                ESTADOS.map(function (e) { return { id: e, label: e }; })
             );
 
             filtersEl.innerHTML = tabs.map(function (t) {
@@ -175,34 +478,38 @@
         }
 
         function renderOrders() {
-            var lista = filtro === 'todos' ? pedidosCache : pedidosCache.filter(function (p) { return p.estado === filtro; });
+            var lista = filtro === 'todos'
+                ? pedidosCache
+                : pedidosCache.filter(function (p) { return p.estado === filtro; });
 
             if (!lista.length) {
-                ordersEl.innerHTML = '<div class="dx-empty">No hay pedidos ' + (filtro === 'todos' ? '' : 'en "' + filtro + '"') + '</div>';
+                ordersEl.innerHTML = '<div class="dx-empty">🦊 No hay pedidos ' +
+                    (filtro === 'todos' ? 'por ahora' : 'en "' + esc(filtro) + '"') + '</div>';
                 return;
             }
 
             ordersEl.innerHTML = lista.map(function (o) {
-                var items = (o.items || []).map(function (it) {
-                    return '<li>' + it.cantidad + '× ' + it.producto + '</li>';
+                var estado = ESTADOS.indexOf(o.estado) >= 0 ? o.estado : 'pendiente';
+                var items = (Array.isArray(o.items) ? o.items : []).map(function (it) {
+                    return '<li><b>' + (Number(it.cantidad) || 0) + '×</b><span>' + esc(it.producto) + '</span></li>';
                 }).join('');
 
                 return (
-                    '<div class="dx-order ' + o.estado + '">' +
+                    '<div class="dx-order ' + estado + '">' +
                     '<div class="dx-order-top">' +
-                    '<div><div class="dx-order-who">' + o.mesa_nombre + '</div>' +
+                    '<div><div class="dx-order-who">' + esc(o.mesa_nombre) + '</div>' +
                     '<div class="dx-order-time">' + timeAgo(o.creado_en) + '</div></div>' +
-                    '<span class="dx-badge ' + o.estado + '">' + o.estado + '</span>' +
+                    '<span class="dx-badge">' + estado + '</span>' +
                     '</div>' +
                     '<ul>' + items + '</ul>' +
-                    '<div class="dx-order-total"><span>Total</span><span>$' + Number(o.total).toFixed(2) + '</span></div>' +
+                    '<div class="dx-order-total"><span>Total</span><span>$' + (Number(o.total) || 0).toFixed(2) + '</span></div>' +
                     '<div class="dx-order-actions">' +
-                    '<select data-id="' + o.id + '">' +
+                    '<select data-id="' + esc(o.id) + '">' +
                     ESTADOS.map(function (s) {
-                        return '<option value="' + s + '"' + (s === o.estado ? ' selected' : '') + '>' + s + '</option>';
+                        return '<option value="' + s + '"' + (s === estado ? ' selected' : '') + '>' + s + '</option>';
                     }).join('') +
                     '</select>' +
-                    '<button class="dx-del-btn" data-del="' + o.id + '">Eliminar</button>' +
+                    '<button class="dx-del-btn" data-del="' + esc(o.id) + '">Eliminar</button>' +
                     '</div>' +
                     '</div>'
                 );
@@ -210,9 +517,13 @@
 
             ordersEl.querySelectorAll('select').forEach(function (sel) {
                 sel.addEventListener('change', function () {
-                    sb.from('pedidos').update({ estado: sel.value }).eq('id', sel.dataset.id).then(loadOrders);
+                    sb.from('pedidos').update({ estado: sel.value }).eq('id', sel.dataset.id).then(function (res) {
+                        if (res.error) alert('No se pudo cambiar el estado: ' + res.error.message);
+                        loadOrders();
+                    });
                 });
             });
+
             ordersEl.querySelectorAll('[data-del]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     if (!confirm('¿Eliminar este pedido? Esta acción no se puede deshacer.')) return;
