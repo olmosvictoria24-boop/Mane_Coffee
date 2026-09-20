@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de pedidos - DeskFox</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background: #fff8f0; font-family: "Poppins","Segoe UI",sans-serif; color: #3d2817; }
+        .dx-wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px; }
+        .dx-wrap h1 { color: #e67e22; }
+        #dx-login { max-width: 340px; margin: 80px auto; background: #fff; border: 2px solid #ff8c42;
+            border-radius: 14px; padding: 24px; text-align: center; }
+        #dx-login input { width: 100%; box-sizing: border-box; padding: 10px; margin: 8px 0;
+            border: 1px solid #ddd; border-radius: 8px; }
+        #dx-login button, .dx-logout { padding: 10px 18px; border: none; border-radius: 10px;
+            background: #ff8c42; color: #fff; font-weight: 700; cursor: pointer; }
+        #dx-login-msg { color: #c0392b; font-size: 13px; min-height: 18px; }
+        #dx-app { display: none; }
+        .dx-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .dx-order { background: #fff; border: 1px solid #f0dcc0; border-radius: 12px; padding: 14px 16px;
+            margin-bottom: 12px; }
+        .dx-order-head { display: flex; justify-content: space-between; font-weight: 700; }
+        .dx-order ul { margin: 8px 0; padding-left: 18px; font-size: 14px; }
+        .dx-badge { font-size: 12px; padding: 3px 10px; border-radius: 12px; font-weight: 700; }
+        .dx-badge.pendiente { background: #fdecea; color: #c0392b; }
+        .dx-badge.preparando { background: #fff4e0; color: #e67e22; }
+        .dx-badge.listo { background: #e8f6ea; color: #2e7d32; }
+        .dx-badge.entregado { background: #eee; color: #777; }
+        .dx-order select { margin-top: 8px; padding: 5px 8px; border-radius: 6px; border: 1px solid #ddd; }
+        .dx-empty { text-align: center; color: #999; padding: 40px 0; }
+    </style>
+</head>
+<body>
+    <div class="dx-wrap">
+        <div id="dx-login">
+            <h1 style="font-size:20px">Acceso del personal</h1>
+            <input id="dx-email" type="email" placeholder="Correo">
+            <input id="dx-pass" type="password" placeholder="Contraseña">
+            <div id="dx-login-msg"></div>
+            <button id="dx-login-btn">Entrar</button>
+        </div>
+
+        <div id="dx-app">
+            <div class="dx-top">
+                <h1>Pedidos</h1>
+                <button class="dx-logout" id="dx-logout-btn">Salir</button>
+            </div>
+            <div id="dx-orders"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script>
+        var sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+        var loginBox = document.getElementById('dx-login');
+        var app = document.getElementById('dx-app');
+        var ordersEl = document.getElementById('dx-orders');
+        var loginMsg = document.getElementById('dx-login-msg');
+
+        document.getElementById('dx-login-btn').addEventListener('click', function () {
+            var email = document.getElementById('dx-email').value.trim();
+            var pass = document.getElementById('dx-pass').value;
+            loginMsg.textContent = '';
+            sb.auth.signInWithPassword({ email: email, password: pass }).then(function (res) {
+                if (res.error) { loginMsg.textContent = 'Correo o contraseña incorrectos'; return; }
+                showApp();
+            });
+        });
+
+        document.getElementById('dx-logout-btn').addEventListener('click', function () {
+            sb.auth.signOut().then(function () { location.reload(); });
+        });
+
+        function showApp() {
+            loginBox.style.display = 'none';
+            app.style.display = 'block';
+            loadOrders();
+            sb.channel('pedidos-realtime')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, loadOrders)
+                .subscribe();
+        }
+
+        function loadOrders() {
+            sb.from('pedidos').select('*').order('creado_en', { ascending: false }).then(function (res) {
+                if (res.error) { ordersEl.innerHTML = '<p>Error cargando pedidos: ' + res.error.message + '</p>'; return; }
+                renderOrders(res.data || []);
+            });
+        }
+
+        function renderOrders(orders) {
+            if (!orders.length) { ordersEl.innerHTML = '<div class="dx-empty">Aún no hay pedidos</div>'; return; }
+            ordersEl.innerHTML = orders.map(function (o) {
+                var items = (o.items || []).map(function (it) {
+                    return '<li>' + it.cantidad + '× ' + it.producto + ' — $' + Number(it.precio).toFixed(2) + '</li>';
+                }).join('');
+                var fecha = new Date(o.creado_en).toLocaleString();
+                return (
+                    '<div class="dx-order">' +
+                    '<div class="dx-order-head"><span>' + o.mesa_nombre + '</span>' +
+                    '<span class="dx-badge ' + o.estado + '">' + o.estado + '</span></div>' +
+                    '<div style="font-size:12px;color:#999">' + fecha + '</div>' +
+                    '<ul>' + items + '</ul>' +
+                    '<div><b>Total: $' + Number(o.total).toFixed(2) + '</b></div>' +
+                    '<select data-id="' + o.id + '">' +
+                    ['pendiente', 'preparando', 'listo', 'entregado'].map(function (s) {
+                        return '<option value="' + s + '"' + (s === o.estado ? ' selected' : '') + '>' + s + '</option>';
+                    }).join('') +
+                    '</select>' +
+                    '</div>'
+                );
+            }).join('');
+
+            ordersEl.querySelectorAll('select').forEach(function (sel) {
+                sel.addEventListener('change', function () {
+                    sb.from('pedidos').update({ estado: sel.value }).eq('id', sel.dataset.id).then(loadOrders);
+                });
+            });
+        }
+
+        sb.auth.getSession().then(function (res) {
+            if (res.data.session) showApp();
+        });
+    </script>
+</body>
+</html>
